@@ -12,7 +12,7 @@ class App extends Component {
   render() {
     return (
       <div>
-        <LandingPage/>
+        <LandingPage name="raj"/>
         <div id="player"></div>
       </div>
     );

@@ -15,12 +15,12 @@ class LandingPage extends Component {
 
     onCreateRoom = () => {
       this.setState({roomCreated : true})
-      ReactDOM.render(<Player/>, document.getElementById("player"));
+      ReactDOM.render(<Player show={true}/>, document.getElementById("player"));
     }
 
     onJoinRoom = ({match}) => {
       alert('on join room ' + match.params.id);
-      return <Player/>
+      return <Player show={true}/>
     }
 
     createRoom = () => {
@@ -35,23 +35,15 @@ class LandingPage extends Component {
 
     render() {
 
-        var myroutes=
-        <Switch>
-            <Route path="/"  exact component={this.createRoom}/>
-            <Route path="/joinroom/:id" exact component={this.onJoinRoom}/>
-        </Switch>
-
-        var myrouter=<Router>
-            {myroutes}
-        </Router>
-
-
-        var myrender=<div>
+        return <div>
           <Nav/>
-          {myrouter}
+          <Router>
+            <Switch>
+              <Route path="/"  exact component={this.createRoom}/>
+              <Route path="/:id" exact component={this.onJoinRoom}/>
+            </Switch>
+          </Router>
         </div>
-
-        return myrender;
 
     }
   }
