@@ -1,5 +1,7 @@
 import React,{Component} from 'react';
 import YouTube from 'react-youtube';
+import './Player.css'
+
 
 class Player extends Component {
     
@@ -9,7 +11,6 @@ class Player extends Component {
             show : true,
             videoUrl : "2g811Eo7K8U",
             player : {
-                videoUrl : "2g811Eo7K8U",
                 height: '390',
                 width: '640',
                 playerVars: {
@@ -18,7 +19,8 @@ class Player extends Component {
                 }
               }
         };
-        this.host = false;
+        this.enablePusher = this.enablePusher;
+        this.host = this.props.host == null ? false : true;
         this.videoUrl = "2g811Eo7K8U";
         this.token = null;
         this.hosturl = "http://127.0.0.1:9000";
@@ -32,17 +34,23 @@ class Player extends Component {
     }
 
     render() {
+
+        console.log(this.state)
+
         const opts = this.state.player;
         var videolink = <div className='streamUrl'>
             <input type="text"  id="videourl" onChange={this.streamUrlChange} placeholder="Enter Youtube Url Here" style={{marginRight:20}}></input>
             <button onClick={this.onStream}> stream </button>
         </div>
+
         var player =<center><div>  {videolink} 
         <YouTube
-         videoId={this.videoUrl} 
+         videoId={this.state.videoUrl} 
          opts={opts} 
          onReady={this._onReady}
+         onStateChange={this._onStateChange}
          />   </div></center> 
+
         let show = this.state.show;
         return show === true ? player : null;
     }
@@ -58,8 +66,25 @@ class Player extends Component {
 
     _onReady = (event) => {
         // access to player in all event handlers via event.target
-        event.target.cueVideoById(this.state.player.videoUrl, 0);
+        event.target.cueVideoById(this.state.videoUrl, 0);
       }
+
+
+    _onStateChange = (event) => {
+        if(!this.host)
+            return;
+        var data = JSON.stringify({state: event.data, time: event.target.getCurrentTime(), hostname: "vinayak", roomId: "1"});
+        //var states = [YouTube.PAUSED, YouTube.PLAYING];
+        var states = [1, 2];
+        if (states.includes(event.data)) {
+            const requestOptions = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            };
+            fetch(this.updateStateUrl, requestOptions)
+        }
+    }
 
     
 }
