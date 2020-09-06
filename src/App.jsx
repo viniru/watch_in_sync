@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import './App.css';
 import LandingPage from './homepage/Landing';
 import Nav from './homepage/nav';
-import Youtube from './homepage/Youtube'
 
 class App extends Component {
   constructor(props){

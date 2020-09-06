@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Switch , Route } from 'react-router-dom';
 import ReactDOM from 'react-dom';
 import Nav from './nav';
 import Player from './Player'
-import Youtube from './Youtube'
 
 class LandingPage extends Component {
     constructor(props){

@@ -1,6 +1,5 @@
 import React,{Component} from 'react';
-import Youtube from './Youtube';
-import './Player.css';
+import YouTube from 'react-youtube';
 
 class Player extends Component {
     
@@ -33,15 +32,16 @@ class Player extends Component {
     }
 
     render() {
+        const opts = this.state.player;
         var videolink = <div className='streamUrl'>
-            <input type="text" id="videourl" onChange={this.streamUrlChange} placeholder="Enter Youtube Url Here" style={{marginRight:20}}></input>
+            <input type="text"  id="videourl" onChange={this.streamUrlChange} placeholder="Enter Youtube Url Here" style={{marginRight:20}}></input>
             <button onClick={this.onStream}> stream </button>
         </div>
         var player =<center><div>  {videolink} 
-        <Youtube
-         videoUrl={this.state.videoUrl}
-         _onReady = {this._onReady}
-         player = {this.state.player}
+        <YouTube
+         videoId={this.videoUrl} 
+         opts={opts} 
+         onReady={this._onReady}
          />   </div></center> 
         let show = this.state.show;
         return show === true ? player : null;
