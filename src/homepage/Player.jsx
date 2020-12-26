@@ -9,7 +9,6 @@ class Player extends Component {
         super(props);
         this.state = {
             show : true,
-            videoUrl : "2g811Eo7K8U",
             player : {
                 height: '390',
                 width: '640',
@@ -17,26 +16,16 @@ class Player extends Component {
                   // https://developers.google.com/youtube/player_parameters
                   autoplay: 1
                 }
-              }
+              },
+            
         };
-        this.enablePusher = this.enablePusher;
-        this.host = this.props.host == null ? false : true;
-        this.videoUrl = "2g811Eo7K8U";
-        this.token = null;
-        this.hosturl = "http://127.0.0.1:9000";
-        this.createRoomUrl = this.hosturl + "/createRoom";
-        this.joinRoomUrl = this.hosturl + "/joinRoom";
-        this.updateUrl = this.hosturl + "/updateUrl";
-        this.updateStateUrl = this.hosturl + "/updateState";
-        this.initUserUrl = this.hosturl + "/init";
-        this.syncUrl = this.hosturl + "/sync";
-        this.authUrl = this.hosturl + "/user/auth";
+        this.videoUrl = props.videoUrl !== null ? props.videoUrl : "n3g_RlXslxE",
+        this.player = null  
+        this.host = this.props.host !== null? this.props.host : true;
     }
 
     render() {
-
-        console.log(this.state)
-
+        
         const opts = this.state.player;
         var videolink = <div className='streamUrl'>
             <input type="text"  id="videourl" onChange={this.streamUrlChange} placeholder="Enter Youtube Url Here" style={{marginRight:20}}></input>
@@ -45,7 +34,7 @@ class Player extends Component {
 
         var player =<center><div>  {videolink} 
         <YouTube
-         videoId={this.state.videoUrl} 
+         videoId={this.videoUrl} 
          opts={opts} 
          onReady={this._onReady}
          onStateChange={this._onStateChange}
@@ -56,37 +45,71 @@ class Player extends Component {
     }
 
     onStream = () => {
-        let newState = {
-            show : true,
-            videoUrl:  document.getElementById("videourl").value
-        }
-        this.setState(newState)
+        // let newState = {
+        //     show : true,
+        //     videoUrl:  
+        // }
+        // this.setState(newState)
+
+        this.videoUrl = document.getElementById("videourl").value;
+        this.player.cueVideoById(this.videoUrl)
+        
+        if(this.host)
+        this.props.triggerUpdateVideoUrl({"videoUrl" : this.videoUrl});
+    }
+
+    updateUrl = (data) => {
+        this.host = data.host;
+        this.videoUrl = data.videoUrl;
+        this.setState(this.state);
+    }
+
+    updateVideoUrl = (data) => {
+        this.videoUrl = data.videoUrl;
+        this.player.cueVideoById(this.videoUrl)
+        this.setState(this.state)
     }
 
 
     _onReady = (event) => {
         // access to player in all event handlers via event.target
-        event.target.cueVideoById(this.state.videoUrl, 0);
+        this.player = event.target;
+        this.player.cueVideoById(this.videoUrl);
       }
 
 
     _onStateChange = (event) => {
         if(!this.host)
             return;
-        var data = JSON.stringify({state: event.data, time: event.target.getCurrentTime(), hostname: "vinayak", roomId: "1"});
+        var data = {state: event.data, time: event.target.getCurrentTime()};
         //var states = [YouTube.PAUSED, YouTube.PLAYING];
-        var states = [1, 2];
+        var states = [1, 2, 5];
         if (states.includes(event.data)) {
-            const requestOptions = {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            };
-            fetch(this.updateStateUrl, requestOptions)
+            this.props.updateFunc(data)
         }
     }
 
+    updateState = (data) => {
+        console.log(data);
+        if(data.videoUrl !== null && data.videoUrl !== this.videoUrl){
+            var newState = this.state;
+            this.videoUrl = data.videoUrl
+            this.setState(newState);
+        }
+        if (data.state === 2 || data.state === 5) {
+            this.player.pauseVideo();
+            this.player.seekTo(data.time);
+        } else if (data.state === 1) {
+            this.player.seekTo(data.time);
+            this.player.playVideo();
+        }
+    }
+
+    getDataForSync = () => {
+       return {state: this.player.getPlayerState(), time: this.player.getCurrentTime()}
+    }
     
+
 }
 
 export default Player;
